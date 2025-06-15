@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Checkout</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="checkout-container">
+            <h2>Complete Your Purchase</h2>
+            
+            <div id="product-summary">
+                <!-- Product details will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                
+                <div class="payment-option" id="mpesa-option">
+                    <input type="radio" name="payment" id="mpesa" checked>
+                    <label for="mpesa">M-Pesa Mobile Payment</label>
+                </div>
+                
+                <div class="payment-details" id="mpesa-details">
+                    <h4>Pay with M-Pesa</h4>
+                    <p>Enter your M-Pesa phone number to receive a payment request</p>
+                    <input type="tel" id="mpesa-phone" placeholder="07XX XXX XXX" required>
+                    <button id="mpesa-pay-btn" class="btn">Pay with M-Pesa</button>
+                </div>
+                
+                <div class="payment-option" id="crypto-option">
+                    <input type="radio" name="payment" id="crypto">
+                    <label for="crypto">Cryptocurrency (BTC/ETH/USDT)</label>
+                </div>
+                
+                <div class="payment-details" id="crypto-details">
+                    <h4>Pay with Crypto</h4>
+                    <p>Select your preferred cryptocurrency</p>
+                    <select id="crypto-currency">
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="USDT">Tether (USDT)</option>
+                    </select>
+                    <button id="crypto-pay-btn" class="btn">Pay with Crypto</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2023 Digital Marketplace</p>
+    </footer>
+    
+    <script src="js/main.js"></script>
+    <script src="js/payments.js"></script>
+    <script src="js/crypto.js"></script>
+    <script>
+        // Get product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product');
+        
+        // Product data - in a real app, this would come from a database
+        const products = {
+            '1': { name: 'Premium Website Templates', price: 29.99 },
+            '2': { name: 'Programming E-books', price: 19.99 },
+            '3': { name: 'UI Component Kit', price: 39.99 }
+        };
+        
+        // Display product summary
+        if (products[productId]) {
+            document.getElementById('product-summary').innerHTML = `
+                <h3>${products[productId].name}</h3>
+                <p>Price: $${products[productId].price.toFixed(2)}</p>
+            `;
+        } else {
+            alert('Invalid product selected');
+            window.location.href = 'products.html';
+        }
+        
+        // Payment method selection
+        document.querySelectorAll('.payment-option input').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Hide all payment details
+                document.querySelectorAll('.payment-details').forEach(details => {
+                    details.style.display = 'none';
+                });
+                
+                // Show selected payment details
+                if (this.id === 'mpesa') {
+                    document.getElementById('mpesa-details').style.display = 'block';
+                } else if (this.id === 'crypto') {
+                    document.getElementById('crypto-details').style.display = 'block';
+                }
+            });
+        });
+        
+        // Initialize with M-Pesa visible
+        document.getElementById('mpesa-details').style.display = 'block';
+        
+        // M-Pesa payment handler
+        document.getElementById('mpesa-pay-btn').addEventListener('click', async () => {
+            const phone = document.getElementById('mpesa-phone').value;
+            if (!phone.match(/^07[0-9]{8}$/)) {
+                alert('Please enter a valid Kenyan phone number (07XXXXXXXX)');
+                return;
+            }
+            
+            const amount = products[productId].price;
+            const result = await mpesaPayment(phone, amount, productId);
+            
+            if (result.success) {
+                alert('Payment request sent to your phone. Please complete the payment.');
+            } else {
+                alert(`Payment failed: ${result.message}`);
+            }
+        });
+        
+        // Crypto payment handler
+        document.getElementById('crypto-pay-btn').addEventListener('click', () => {
+            const currency = document.getElementById('crypto-currency').value;
+            const amount = products[productId].price;
+            cryptoPayment(amount, productId, currency);
+        });
+    </script>
+</body>
+</html>

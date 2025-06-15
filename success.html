@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Payment Successful</h1>
+    </header>
+    
+    <main>
+        <section class="success-message">
+            <h2>Thank you for your purchase!</h2>
+            <p>Your product is ready for download.</p>
+            
+            <div id="product-access">
+                <!-- This will be populated by JavaScript -->
+            </div>
+            
+            <button id="download-btn" class="btn">Download Now</button>
+        </section>
+    </main>
+    
+    <script src="js/main.js"></script>
+    <script>
+        // Get product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product');
+        const txnId = urlParams.get('txn');
+        
+        // In a real app, you would verify the payment with your backend first
+        document.getElementById('download-btn').addEventListener('click', () => {
+            downloadProduct(productId, txnId);
+        });
+        
+        function downloadProduct(productId, txnId) {
+            // This would normally be verified with your backend
+            const productData = {
+                '1': { name: 'Premium Templates', file: 'premium-templates.zip' },
+                '2': { name: 'E-book Collection', file: 'ebooks.zip' }
+                // Add all your products here
+            };
+            
+            if (productData[productId]) {
+                // Create a temporary download link
+                const link = document.createElement('a');
+                link.href = `zipfiles/${productData[productId].file}`;
+                link.download = productData[productId].file;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Update UI
+                document.getElementById('product-access').innerHTML = `
+                    <h3>${productData[productId].name}</h3>
+                    <p>Download started automatically. If not, <a href="zipfiles/${productData[productId].file}" download>click here</a>.</p>
+                `;
+            } else {
+                alert('Product not found. Please contact support.');
+            }
+        }
+    </script>
+</body>
+</html>
